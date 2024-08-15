@@ -146,9 +146,12 @@ export default function Dashboard() {
           console.log('Conversations saved to Firestore');
           await updateUserHasUploaded(user?.uid!);
           setProgress(100);
+          getUserQuery.refetch();
+          getConversationsQuery.refetch();
         })
         .catch((error) => {
           console.error('Error fetching the JSON file:', error);
+          throw error;
         });
     },
     onError: (err: any) => {
@@ -158,6 +161,7 @@ export default function Dashboard() {
     onSuccess: () => {
       toast.success('Dummy data uploaded successfully');
       getUserQuery.refetch();
+      getConversationsQuery.refetch();
     },
   });
 
