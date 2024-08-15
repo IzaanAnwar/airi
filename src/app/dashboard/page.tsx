@@ -10,7 +10,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import axios from 'axios'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { auth, db, storage } from '@/lib/firebase'
 import {
@@ -19,6 +19,7 @@ import {
   doc,
   getDocs,
   setDoc,
+  updateDoc,
   writeBatch,
 } from 'firebase/firestore'
 import { toast } from 'sonner'
@@ -28,9 +29,14 @@ import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Conversation, IUser, Message } from '@/types'
-import { extractChatData } from '@/lib/utils'
+import { extractChatData } from '@/lib/queries'
 import { Progress } from '@/components/ui/progress'
-import { getSummary, getUsersCoversations, tagData } from '@/lib/queries'
+import {
+  getSummary,
+  getUsersCoversations,
+  tagData,
+  updateUserHasUploaded,
+} from '@/lib/queries'
 import CoversationCard from '@/components/coversation-card'
 import {
   Accordion,
@@ -39,7 +45,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 
-const MOCK_FILE_IDETIFIER = 'conversations.json_wO11ZJVshPbdCGobWqRhvBWiq5W2'
+const MOCK_FILE_IDETIFIER = '/mockdata/user.json'
 export default function Dashboard() {
   let total = 0
   const [progress, setProgress] = useState(0)
@@ -87,13 +93,17 @@ export default function Dashboard() {
       total = data.length
       await saveConversationsToFirestore(data)
       console.log('Conversations saved to Firestore', { total })
+      await updateUserHasUploaded(user?.uid!)
+      setProgress(100)
     },
     onError: (err: any) => {
       console.error({ err })
       toast.error((err as Error).message ?? 'Something went wrong')
     },
-    onSuccess: (data: any) => {
+    onSuccess: () => {
       toast.success('File uploaded successfully')
+      getUserQuery.refetch()
+      getConversationsQuery.refetch()
     },
   })
 
@@ -108,6 +118,49 @@ export default function Dashboard() {
     },
   })
 
+  const startWithDummyData = useMutation({
+    mutationKey: ['startWithDummyData'],
+    mutationFn: async () => {
+      if (!user) {
+        throw new Error('User not found')
+      }
+
+      axios
+        .get(MOCK_FILE_IDETIFIER)
+        .then(async (response) => {
+          const data = response.data
+
+          console.log({ data })
+          const jsonBlob = new Blob([JSON.stringify(data)], {
+            type: 'application/json',
+          })
+
+          // Create a File object from the Blob
+          const mockFile = new File([jsonBlob], 'user.json', {
+            type: 'application/json',
+          })
+          console.log({ mockFile })
+
+          const extractedData = await extractChatData(mockFile)
+          await saveConversationsToFirestore(extractedData)
+          console.log('Conversations saved to Firestore')
+          await updateUserHasUploaded(user?.uid!)
+          setProgress(100)
+        })
+        .catch((error) => {
+          console.error('Error fetching the JSON file:', error)
+        })
+    },
+    onError: (err: any) => {
+      console.error({ err })
+      toast.error((err as Error).message ?? 'Something went wrong')
+    },
+    onSuccess: () => {
+      toast.success('Dummy data uploaded successfully')
+      getUserQuery.refetch()
+    },
+  })
+
   // Define the maximum number of documents per batch
   const BATCH_SIZE = 10
   async function saveConversationsToFirestore(
@@ -116,6 +169,7 @@ export default function Dashboard() {
     let batch = writeBatch(db)
     let batchCounter = 0
     let totalBatches = 0
+    const docPath = `conversations/${user?.uid}/userConversations`
 
     for (const conversation of conversations) {
       // calc
@@ -127,12 +181,7 @@ export default function Dashboard() {
       console.log({ pro, totalBatches, total })
 
       setProgress(pro)
-
-      const conversationRef = doc(
-        db,
-        `conversations/${user?.uid}/userConversations`,
-        conversation.conversation_id,
-      )
+      const conversationRef = doc(db, docPath, conversation.conversation_id)
 
       const tagRes = await tagData([
         JSON.stringify({
@@ -170,29 +219,10 @@ export default function Dashboard() {
         `Final batch ${totalBatches} committed with ${batchCounter} conversations.`,
       )
     }
-    setProgress(100)
     console.log(
       `Finished saving ${conversations.length} conversations in ${totalBatches} batches.`,
     )
   }
-
-  const getSummaryMutation = useMutation({
-    mutationKey: ['getSummary'],
-    mutationFn: async () => {
-      const { data, error } = await getSummary({
-        conversationId: '00d7fec6-81af-4c20-8863-48a1392ba073',
-        userId: user?.uid!,
-      })
-      if (error) {
-        throw new Error(error)
-      }
-      return data
-    },
-    onError: (err: any) => {
-      console.error({ err })
-      toast.error((err as Error).message ?? 'Something went wrong')
-    },
-  })
 
   const uploadFileMutation = useMutation({
     mutationKey: ['uploadFile'],
@@ -239,6 +269,9 @@ export default function Dashboard() {
             <CardDescription>
               Share your conversation to get more insights of your chats.
             </CardDescription>
+            <CardDescription>
+              Do not want to wait? Start with dummy data
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-4">
@@ -260,6 +293,7 @@ export default function Dashboard() {
                 isPending={processFileMutation.isPending}
                 isDisabled={processFileMutation.isPending}
                 onClick={() => {
+                  setProgress(0)
                   processFileMutation.mutate()
                 }}
               >
@@ -274,6 +308,18 @@ export default function Dashboard() {
                   <Progress value={progress} className="w-full" />
                 )}
               </div>
+              <Button
+                className="my-2"
+                isPending={startWithDummyData.isPending}
+                onClick={() => {
+                  setProgress(0)
+
+                  startWithDummyData.mutate()
+                }}
+                isDisabled={startWithDummyData.isPending}
+              >
+                Start with Dummy Data
+              </Button>
               <Button
                 onClick={() => {
                   if (!user) {
@@ -294,21 +340,17 @@ export default function Dashboard() {
               >
                 Upload File
               </Button>
-
-              {/* <Button
-                isPending={getSummaryMutation.isPending}
-                isDisabled={getSummaryMutation.isPending}
-                onClick={() => {
-                  getSummaryMutation.mutate()
-                }}
-              >
-                Get Summary
-              </Button> */}
             </div>
           </CardFooter>
         </Card>
       )}
-      <main className="flex flex-1 flex-col gap-8  w-full ">
+      <main className="flex flex-1 flex-col gap-8  w-full pt-4 border-t mt-4">
+        {getConversationsQuery.data &&
+          getConversationsQuery.data.length > 0 && (
+            <Label className="text-lg font-semibold text-zinc-500">
+              Open a category to get view your conversations
+            </Label>
+          )}
         {getConversationsQuery.data && (
           <ConversationsPage conversations={getConversationsQuery.data} />
         )}
@@ -345,7 +387,7 @@ const ConversationsPage: React.FC<ConversationsPageProps> = ({
     <Accordion type="single" collapsible className="w-full space-y-2 ">
       {Object.keys(groupedConversations).map((label) => (
         <AccordionItem key={label} value={label} className="border-none">
-          <AccordionTrigger className="text-lg font-bold hover:no-underline hover:bg-primary/5 rounded-xl px-4 ">
+          <AccordionTrigger className="text-lg font-bold duration-200  hover:no-underline hover:bg-primary/5 rounded-xl px-4 ">
             {label}
           </AccordionTrigger>
           <AccordionContent>

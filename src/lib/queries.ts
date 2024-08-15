@@ -1,8 +1,62 @@
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from 'firebase/firestore'
 import { db } from './firebase'
 
 import { CohereClient } from 'cohere-ai'
-import { Conversation } from '@/types'
+import { Conversation, Message } from '@/types'
+
+export async function extractChatData(file: File): Promise<Conversation[]> {
+  console.log('Extracting chat data from file...')
+  const fileContent = await file.text()
+  const jsonData = JSON.parse(fileContent)
+
+  const extractedData: Conversation[] = jsonData.map((conversation: any) => {
+    const { title, create_time, update_time, conversation_id, mapping } =
+      conversation
+
+    // Extract messages from mapping
+    const messages: Message[] = Object.values(mapping)
+      .map((node: any) => {
+        console.log('Processing message...')
+        if (node.message) {
+          const { id, author, content, create_time, parent, children } =
+            node.message
+          // Safely handle the content.parts array
+          const contentParts = Array.isArray(content?.parts)
+            ? content.parts
+            : []
+          return {
+            id,
+            author_role: author.role ?? 'user',
+            content: contentParts.join(' '), // Combine the content parts into a single string
+            timestamp: create_time || 0,
+            parent_id: node.parent || undefined,
+            children_ids: node.children || [],
+          } as Message
+        }
+        return null
+      })
+      .filter((msg: Message | null) => msg !== null) as Message[]
+    console.log('Processing conversation...')
+
+    return {
+      title,
+      create_time,
+      update_time,
+      conversation_id,
+      messages,
+    } as Conversation
+  })
+
+  return extractedData
+}
 
 const cohere = new CohereClient({
   token: process.env.NEXT_PUBLIC_COHERCE_API_KEY,
@@ -260,4 +314,22 @@ export async function tagData(data: string[]) {
     ],
   })
   return completions
+}
+
+export async function updateUserHasUploaded(userId: string) {
+  const userRef = collection(db, 'users')
+  const q = query(userRef, where('id', '==', userId))
+  const querySnapshot = await getDocs(q)
+  if (!querySnapshot.empty) {
+    const userDoc = querySnapshot.docs[0]
+    const userRef = doc(db, 'users', userDoc.id)
+
+    await updateDoc(userRef, {
+      has_uploaded: true,
+    })
+
+    console.log('User document has been updated successfully.')
+  } else {
+    console.log('No user document found with the provided email.')
+  }
 }

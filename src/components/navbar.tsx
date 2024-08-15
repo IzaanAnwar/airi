@@ -24,7 +24,7 @@ export function Navbar() {
     <nav className=" fixed top-0 left-0 right-0 z-50 backdrop-blur-sm shadow-sm">
       <div className="mx-auto px-4 md:px-16 lg:px-32 w-full">
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             <div className="flex-shrink-0">
               <Image
                 className="h-8 w-8"
@@ -34,11 +34,13 @@ export function Navbar() {
                 height={40}
               />
             </div>
-            <div className="hidden md:block">
+            <h3 className="font-bold hover:text-primary duration-200">airi</h3>
+
+            <div className="">
               <div className="ml-10 flex items-baseline space-x-4">
                 <a
                   href="/dashboard"
-                  className="text-sm font-medium text-gray-900 hover:text-gray-700"
+                  className="text-sm font-medium text-gray-900 hover:text-primary duration-200"
                 >
                   Dashboard
                 </a>
@@ -57,7 +59,7 @@ export function Navbar() {
                 Logout
               </Button>
             ) : (
-              <Button>
+              <Button isPending={loading} isDisabled={loading}>
                 <Link href="/login" className="w-full h-full">
                   Login
                 </Link>
