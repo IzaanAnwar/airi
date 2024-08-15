@@ -203,7 +203,7 @@ export default function Component() {
                       <h3 className="text-xl font-bold">Data Backup</h3>
                       <p className="text-muted-foreground">
                         Automatically backup your ChatGPT conversation data to
-                        ensure it's always safe and secure.
+                        ensure it&apos;s always safe and secure.
                       </p>
                     </div>
                   </li>
@@ -220,7 +220,7 @@ export default function Component() {
                     <div className="grid gap-1">
                       <h3 className="text-xl font-bold">Data Analysis</h3>
                       <p className="text-muted-foreground">
-                        Leverage Airi's analytics tools to gain valuable
+                        Leverage Airi&apos;s analytics tools to gain valuable
                         insights from your ChatGPT data.
                       </p>
                     </div>
