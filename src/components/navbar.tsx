@@ -30,7 +30,7 @@ export function Navbar() {
       <div className="mx-auto px-4 md:px-16 lg:px-32 w-full">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex-shrink-0">
+            <Link href={'/'} className="flex-shrink-0">
               <Image
                 className="h-8 w-8"
                 src="/next.svg"
@@ -38,17 +38,24 @@ export function Navbar() {
                 width={40}
                 height={40}
               />
-            </div>
-            <h3 className="font-bold hover:text-primary duration-200">airi</h3>
+            </Link>
+            <Link
+              href={'/'}
+              className="font-bold hover:text-primary duration-200"
+            >
+              airi
+            </Link>
 
             <div className="">
               <div className="ml-10 flex items-baseline space-x-4">
-                <a
-                  href="/dashboard"
-                  className="text-sm font-medium text-gray-900 hover:text-primary duration-200"
-                >
-                  Dashboard
-                </a>
+                {user?.uid && (
+                  <a
+                    href="/dashboard"
+                    className="text-sm font-medium text-gray-900 hover:text-primary duration-200"
+                  >
+                    Dashboard
+                  </a>
+                )}
               </div>
             </div>
           </div>

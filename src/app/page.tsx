@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function Component() {
   return (
-    <div className="flex flex-col min-h-[100dvh] pt-16">
+    <div className="flex flex-col min-h-[100dvh] pt-16 md:pt-8 lg:pt-0">
       <main className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
           <div className="container px-4 md:px-6">
@@ -21,7 +21,7 @@ export default function Component() {
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Link
-                    href="#"
+                    href="/signup"
                     className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                     prefetch={false}
                   >
