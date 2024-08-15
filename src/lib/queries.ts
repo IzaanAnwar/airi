@@ -6,32 +6,32 @@ import {
   query,
   updateDoc,
   where,
-} from 'firebase/firestore'
-import { db } from './firebase'
+} from 'firebase/firestore';
+import { db } from './firebase';
 
-import { CohereClient } from 'cohere-ai'
-import { Conversation, Message } from '@/types'
+import { CohereClient } from 'cohere-ai';
+import { Conversation, Message } from '@/types';
 
 export async function extractChatData(file: File): Promise<Conversation[]> {
-  console.log('Extracting chat data from file...')
-  const fileContent = await file.text()
-  const jsonData = JSON.parse(fileContent)
+  console.log('Extracting chat data from file...');
+  const fileContent = await file.text();
+  const jsonData = JSON.parse(fileContent);
 
   const extractedData: Conversation[] = jsonData.map((conversation: any) => {
     const { title, create_time, update_time, conversation_id, mapping } =
-      conversation
+      conversation;
 
     // Extract messages from mapping
     const messages: Message[] = Object.values(mapping)
       .map((node: any) => {
-        console.log('Processing message...')
+        console.log('Processing message...');
         if (node.message) {
           const { id, author, content, create_time, parent, children } =
-            node.message
+            node.message;
           // Safely handle the content.parts array
           const contentParts = Array.isArray(content?.parts)
             ? content.parts
-            : []
+            : [];
           return {
             id,
             author_role: author.role ?? 'user',
@@ -39,12 +39,12 @@ export async function extractChatData(file: File): Promise<Conversation[]> {
             timestamp: create_time || 0,
             parent_id: node.parent || undefined,
             children_ids: node.children || [],
-          } as Message
+          } as Message;
         }
-        return null
+        return null;
       })
-      .filter((msg: Message | null) => msg !== null) as Message[]
-    console.log('Processing conversation...')
+      .filter((msg: Message | null) => msg !== null) as Message[];
+    console.log('Processing conversation...');
 
     return {
       title,
@@ -52,68 +52,68 @@ export async function extractChatData(file: File): Promise<Conversation[]> {
       update_time,
       conversation_id,
       messages,
-    } as Conversation
-  })
+    } as Conversation;
+  });
 
-  return extractedData
+  return extractedData;
 }
 
 const cohere = new CohereClient({
   token: process.env.NEXT_PUBLIC_COHERCE_API_KEY,
-})
+});
 export const getSummary = async ({
   conversationId,
   userId,
 }: {
-  conversationId: string
-  userId: string
+  conversationId: string;
+  userId: string;
 }) => {
   try {
     const conversationRef = doc(
       db,
       `conversations/${userId}/userConversations`,
       conversationId,
-    )
-    const conversationSnap = await getDoc(conversationRef)
+    );
+    const conversationSnap = await getDoc(conversationRef);
 
     if (!conversationSnap.exists()) {
       return {
         error: 'Conversation not found',
         data: null,
-      }
+      };
     }
 
-    const data = conversationSnap.data()
+    const data = conversationSnap.data();
 
     const completions = await cohere.summarize({
       text: JSON.stringify(data),
-    })
+    });
 
-    console.log({ completions })
+    console.log({ completions });
 
-    return { error: null, data: completions }
+    return { error: null, data: completions };
   } catch (error: any) {
-    console.error('something went wrong', error)
+    console.error('something went wrong', error);
     return {
       error: error?.message ?? 'Something went wrong',
       data: null,
-    }
+    };
   }
-}
+};
 
 export async function getUsersCoversations(userId: string) {
   const conversationsRef = collection(
     db,
     `conversations/${userId}/userConversations`,
-  )
-  const snapshot = await getDocs(conversationsRef)
+  );
+  const snapshot = await getDocs(conversationsRef);
 
   const conversations = snapshot.docs.map((doc) => {
-    const data = doc.data()
-    return data as Conversation
-  })
+    const data = doc.data();
+    return data as Conversation;
+  });
 
-  return conversations
+  return conversations;
 }
 
 export async function getConversationById(
@@ -124,16 +124,16 @@ export async function getConversationById(
     db,
     `conversations/${userId}/userConversations`,
     conversationId,
-  )
-  const snapshot = await getDoc(conversationsRef)
+  );
+  const snapshot = await getDoc(conversationsRef);
 
-  const conversation = snapshot.data()
+  const conversation = snapshot.data();
 
-  return conversation as Conversation | undefined
+  return conversation as Conversation | undefined;
 }
 
 export async function tagData(data: string[]) {
-  const cut = data.slice(0, 96)
+  const cut = data.slice(0, 96);
   const completions = await cohere.classify({
     inputs: cut,
     examples: [
@@ -312,24 +312,24 @@ export async function tagData(data: string[]) {
       { text: 'Other.', label: 'Other' },
       { text: 'Other that dont fit in the above categories.', label: 'Other' },
     ],
-  })
-  return completions
+  });
+  return completions;
 }
 
 export async function updateUserHasUploaded(userId: string) {
-  const userRef = collection(db, 'users')
-  const q = query(userRef, where('id', '==', userId))
-  const querySnapshot = await getDocs(q)
+  const userRef = collection(db, 'users');
+  const q = query(userRef, where('id', '==', userId));
+  const querySnapshot = await getDocs(q);
   if (!querySnapshot.empty) {
-    const userDoc = querySnapshot.docs[0]
-    const userRef = doc(db, 'users', userDoc.id)
+    const userDoc = querySnapshot.docs[0];
+    const userRef = doc(db, 'users', userDoc.id);
 
     await updateDoc(userRef, {
       has_uploaded: true,
-    })
+    });
 
-    console.log('User document has been updated successfully.')
+    console.log('User document has been updated successfully.');
   } else {
-    console.log('No user document found with the provided email.')
+    console.log('No user document found with the provided email.');
   }
 }

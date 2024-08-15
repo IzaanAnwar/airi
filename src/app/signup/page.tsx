@@ -1,27 +1,27 @@
-'use client'
-import Image from 'next/image'
-import Link from 'next/link'
+'use client';
+import Image from 'next/image';
+import Link from 'next/link';
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { auth, db } from '@/lib/firebase'
-import { useEffect, useState } from 'react'
-import { Loader2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
-import { SignupData } from '@/types/auth'
-import { addDoc, collection } from 'firebase/firestore'
-import { useMutation } from '@tanstack/react-query'
-import { useAuthState } from 'react-firebase-hooks/auth'
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { SignupData } from '@/types/auth';
+import { addDoc, collection } from 'firebase/firestore';
+import { useMutation } from '@tanstack/react-query';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 export default function Singup() {
-  const [email, setEmail] = useState('')
-  const [name, setName] = useState('')
-  const [password, setPassword] = useState('')
-  const [user, loading, error] = useAuthState(auth)
-  const router = useRouter()
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [user, loading, error] = useAuthState(auth);
+  const router = useRouter();
 
   const signupMutation = useMutation({
     mutationKey: ['signup'],
@@ -30,36 +30,36 @@ export default function Singup() {
         auth,
         data.email,
         data.password,
-      )
-      const userCreds = response.user
+      );
+      const userCreds = response.user;
       if (userCreds) {
-        const userRef = collection(db, 'users')
+        const userRef = collection(db, 'users');
         await addDoc(userRef, {
           id: userCreds.uid,
           email: userCreds.email,
           name: name,
           has_uploaded: false,
-        })
-        localStorage.setItem('userId', JSON.stringify(userCreds.uid))
-        return { userCreds }
+        });
+        localStorage.setItem('userId', JSON.stringify(userCreds.uid));
+        return { userCreds };
       }
     },
     onError: (err) => {
-      console.error({ err })
-      toast.error((err as Error).message ?? 'Something went wrong')
+      console.error({ err });
+      toast.error((err as Error).message ?? 'Something went wrong');
     },
-  })
+  });
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen w-full">
         <Loader2 className="animate-spin" />{' '}
       </div>
-    )
+    );
   }
 
   if (user) {
-    router.push('/dashboard')
+    router.push('/dashboard');
   }
 
   return (
@@ -111,10 +111,10 @@ export default function Singup() {
               className="w-full"
               onClick={() => {
                 if (!email || !password || !name) {
-                  toast.error('Please fill all fields')
-                  return
+                  toast.error('Please fill all fields');
+                  return;
                 }
-                signupMutation.mutate({ email, password })
+                signupMutation.mutate({ email, password });
               }}
               isPending={signupMutation.isPending}
               isDisabled={signupMutation.isPending}
@@ -140,5 +140,5 @@ export default function Singup() {
         />
       </div>
     </div>
-  )
+  );
 }

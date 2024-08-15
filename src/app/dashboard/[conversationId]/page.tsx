@@ -1,42 +1,42 @@
-'use client'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { auth } from '@/lib/firebase'
-import { getConversationById, getSummary } from '@/lib/queries'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { Loader2, SendIcon } from 'lucide-react'
-import moment from 'moment' // Import Moment.js if needed
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
-import { toast } from 'sonner'
+'use client';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { auth } from '@/lib/firebase';
+import { getConversationById, getSummary } from '@/lib/queries';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Loader2, SendIcon } from 'lucide-react';
+import moment from 'moment'; // Import Moment.js if needed
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { toast } from 'sonner';
 
 export default function ChatPage({
   params,
 }: {
-  params: { conversationId: string }
+  params: { conversationId: string };
 }) {
-  const [user, loading, error] = useAuthState(auth)
-  const [summary, setSummary] = useState<string | undefined>('')
-  const router = useRouter()
+  const [user, loading, error] = useAuthState(auth);
+  const [summary, setSummary] = useState<string | undefined>('');
+  const router = useRouter();
   const getConversationQuery = useQuery({
     queryKey: ['getConversation', params.conversationId],
     queryFn: async () => {
       if (!params.conversationId) {
-        throw new Error('Conversation id not found')
+        throw new Error('Conversation id not found');
       }
       const conversation = await getConversationById(
         params.conversationId,
         user?.uid!,
-      )
-      console.log({ conversation })
+      );
+      console.log({ conversation });
 
-      return conversation
+      return conversation;
     },
-  })
+  });
 
   const getSummaryMutation = useMutation({
     mutationKey: ['getSummary'],
@@ -44,32 +44,32 @@ export default function ChatPage({
       const { data, error } = await getSummary({
         conversationId: params.conversationId,
         userId: user?.uid!,
-      })
+      });
       if (error) {
-        throw new Error(error)
+        throw new Error(error);
       }
-      setSummary(data?.summary)
-      return data?.summary
+      setSummary(data?.summary);
+      return data?.summary;
     },
     onError: (err: any) => {
-      console.error({ err })
-      toast.error((err as Error).message ?? 'Something went wrong')
+      console.error({ err });
+      toast.error((err as Error).message ?? 'Something went wrong');
     },
     onSuccess: (y) => {
-      toast.success('Summary fetched successfully')
+      toast.success('Summary fetched successfully');
     },
-  })
+  });
 
   if (getConversationQuery.isLoading || loading) {
     return (
       <div className="flex justify-center items-center min-h-screen w-full">
         <Loader2 className="animate-spin" />
       </div>
-    )
+    );
   }
 
   if (!user || error) {
-    router.push('/login')
+    router.push('/login');
   }
 
   if (!getConversationQuery.data) {
@@ -82,10 +82,10 @@ export default function ChatPage({
           </p>
         </div>
       </div>
-    )
+    );
   }
 
-  const { messages } = getConversationQuery.data
+  const { messages } = getConversationQuery.data;
 
   return (
     <>
@@ -134,7 +134,7 @@ export default function ChatPage({
               isPending={getSummaryMutation.isPending}
               isDisabled={getSummaryMutation.isPending}
               onClick={() => {
-                getSummaryMutation.mutate()
+                getSummaryMutation.mutate();
               }}
             >
               Get Summary
@@ -152,7 +152,7 @@ export default function ChatPage({
         </div>
       </div>
     </>
-  )
+  );
 }
 
 const UserFullViewIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -176,7 +176,7 @@ const UserFullViewIcon = (props: React.SVGProps<SVGSVGElement>) => (
       strokeLinecap="round"
     />
   </svg>
-)
+);
 const ChatBotIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -230,4 +230,4 @@ const ChatBotIcon = (props: React.SVGProps<SVGSVGElement>) => (
       strokeLinecap="round"
     />
   </svg>
-)
+);

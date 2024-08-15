@@ -1,21 +1,21 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import { Toaster } from 'sonner'
-import { ReactQueryProvider } from '@/providers/react-query'
-import { Navbar } from '@/components/navbar'
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { Toaster } from 'sonner';
+import { ReactQueryProvider } from '@/providers/react-query';
+import { Navbar } from '@/components/navbar';
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'airi',
   description: 'Manage Your ChatGPT Conversations',
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
@@ -36,5 +36,5 @@ export default function RootLayout({
         </ReactQueryProvider>
       </body>
     </html>
-  )
+  );
 }

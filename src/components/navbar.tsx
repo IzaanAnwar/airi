@@ -1,25 +1,25 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import { useAuthState } from 'react-firebase-hooks/auth'
-import { Button } from './ui/button'
-import { auth } from '@/lib/firebase'
-import { useMutation } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import Link from 'next/link'
+import Image from 'next/image';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { Button } from './ui/button';
+import { auth } from '@/lib/firebase';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 export function Navbar() {
   const logoutMut = useMutation({
     mutationKey: ['logout'],
     mutationFn: async () => {
-      await auth.signOut()
+      await auth.signOut();
     },
     onError: (err) => {
-      console.error({ err })
-      toast.error((err as Error).message ?? 'Something went wrong')
+      console.error({ err });
+      toast.error((err as Error).message ?? 'Something went wrong');
     },
-  })
-  const [user, loading, error] = useAuthState(auth)
+  });
+  const [user, loading, error] = useAuthState(auth);
   return (
     <nav className=" fixed top-0 left-0 right-0 z-50 backdrop-blur-sm shadow-sm">
       <div className="mx-auto px-4 md:px-16 lg:px-32 w-full">
@@ -53,7 +53,7 @@ export function Navbar() {
                 isPending={loading || logoutMut.isPending}
                 isDisabled={loading || logoutMut.isPending}
                 onClick={() => {
-                  logoutMut.mutate()
+                  logoutMut.mutate();
                 }}
               >
                 Logout
@@ -69,5 +69,5 @@ export function Navbar() {
         </div>
       </div>
     </nav>
-  )
+  );
 }

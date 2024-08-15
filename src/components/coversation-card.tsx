@@ -1,13 +1,13 @@
-import Link from 'next/link'
-import moment from 'moment'
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
-import { Badge } from './ui/badge'
+import Link from 'next/link';
+import moment from 'moment';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Badge } from './ui/badge';
 
 export default function CoversationCard(props: {
-  title: string
-  id: string
-  label?: string
-  updatedAt: number
+  title: string;
+  id: string;
+  label?: string;
+  updatedAt: number;
 }) {
   return (
     <Link href={`/dashboard/${props.id}`} className="group" prefetch={false}>
@@ -25,5 +25,5 @@ export default function CoversationCard(props: {
         </CardContent>
       </Card>
     </Link>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-import { initializeApp } from 'firebase/app'
-import { getAnalytics } from 'firebase/analytics'
-import { getFirestore } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage'
-import { getAuth } from 'firebase/auth'
-import dotenv from 'dotenv'
-dotenv.config()
+import { initializeApp } from 'firebase/app';
+import { getAnalytics } from 'firebase/analytics';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+import { getAuth } from 'firebase/auth';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,11 +14,11 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_APP_ID,
   measurementId: process.env.NEXT_PUBLIC_MEASUREMENT_ID,
-}
+};
 
-export const app = initializeApp(firebaseConfig)
-export const db = getFirestore(app)
-export const storage = getStorage(app)
-export const auth = getAuth(app)
+export const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
+export const auth = getAuth(app);
 
 // const analytics = getAnalytics(app)

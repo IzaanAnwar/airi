@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import {
   Card,
   CardHeader,
@@ -6,13 +6,13 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import axios from 'axios'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { auth, db, storage } from '@/lib/firebase'
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import axios from 'axios';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { auth, db, storage } from '@/lib/firebase';
 import {
   addDoc,
   collection,
@@ -21,155 +21,155 @@ import {
   setDoc,
   updateDoc,
   writeBatch,
-} from 'firebase/firestore'
-import { toast } from 'sonner'
-import { useState } from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
-import { useRouter } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { Conversation, IUser, Message } from '@/types'
-import { extractChatData } from '@/lib/queries'
-import { Progress } from '@/components/ui/progress'
+} from 'firebase/firestore';
+import { toast } from 'sonner';
+import { useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Conversation, IUser, Message } from '@/types';
+import { extractChatData } from '@/lib/queries';
+import { Progress } from '@/components/ui/progress';
 import {
   getSummary,
   getUsersCoversations,
   tagData,
   updateUserHasUploaded,
-} from '@/lib/queries'
-import CoversationCard from '@/components/coversation-card'
+} from '@/lib/queries';
+import CoversationCard from '@/components/coversation-card';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion'
+} from '@/components/ui/accordion';
 
-const MOCK_FILE_IDETIFIER = '/mockdata/user.json'
+const MOCK_FILE_IDETIFIER = '/mockdata/user.json';
 export default function Dashboard() {
-  let total = 0
-  const [progress, setProgress] = useState(0)
-  const router = useRouter()
-  const [file, setFile] = useState<File | null | undefined>(null)
-  const [user, loading, error] = useAuthState(auth)
+  let total = 0;
+  const [progress, setProgress] = useState(0);
+  const router = useRouter();
+  const [file, setFile] = useState<File | null | undefined>(null);
+  const [user, loading, error] = useAuthState(auth);
 
   async function updateDb(fileURL: string) {
-    const fileRef = collection(db, 'files')
+    const fileRef = collection(db, 'files');
     await addDoc(fileRef, {
       id: crypto.randomUUID(),
       url: fileURL,
-    })
+    });
   }
 
   const getUserQuery = useQuery({
     queryKey: ['getUser', user?.uid],
     queryFn: async () => {
       if (!user) {
-        throw new Error('User not found')
+        throw new Error('User not found');
       }
-      const userRef = collection(db, 'users')
-      const querySnapshot = await getDocs(userRef)
-      console.log({ querySnapshot: querySnapshot.docs })
+      const userRef = collection(db, 'users');
+      const querySnapshot = await getDocs(userRef);
+      console.log({ querySnapshot: querySnapshot.docs });
 
       const userSnapshot = querySnapshot.docs.find(
         (doc) => doc.data().id === user?.uid,
-      )
+      );
 
-      const userdb = userSnapshot?.data()
+      const userdb = userSnapshot?.data();
       if (!userdb) {
-        throw new Error('User not found')
+        throw new Error('User not found');
       }
-      return userdb
+      return userdb;
     },
-  })
+  });
 
   const processFileMutation = useMutation({
     mutationKey: ['processFile'],
     mutationFn: async () => {
       if (!file) {
-        throw new Error('No file selected')
+        throw new Error('No file selected');
       }
-      const data = await extractChatData(file)
-      total = data.length
-      await saveConversationsToFirestore(data)
-      console.log('Conversations saved to Firestore', { total })
-      await updateUserHasUploaded(user?.uid!)
-      setProgress(100)
+      const data = await extractChatData(file);
+      total = data.length;
+      await saveConversationsToFirestore(data);
+      console.log('Conversations saved to Firestore', { total });
+      await updateUserHasUploaded(user?.uid!);
+      setProgress(100);
     },
     onError: (err: any) => {
-      console.error({ err })
-      toast.error((err as Error).message ?? 'Something went wrong')
+      console.error({ err });
+      toast.error((err as Error).message ?? 'Something went wrong');
     },
     onSuccess: () => {
-      toast.success('File uploaded successfully')
-      getUserQuery.refetch()
-      getConversationsQuery.refetch()
+      toast.success('File uploaded successfully');
+      getUserQuery.refetch();
+      getConversationsQuery.refetch();
     },
-  })
+  });
 
   const getConversationsQuery = useQuery({
     queryKey: ['getConversations', user?.uid],
     queryFn: async () => {
       if (!user) {
-        throw new Error('User not found')
+        throw new Error('User not found');
       }
-      const conversations = await getUsersCoversations(user.uid)
-      return conversations
+      const conversations = await getUsersCoversations(user.uid);
+      return conversations;
     },
-  })
+  });
 
   const startWithDummyData = useMutation({
     mutationKey: ['startWithDummyData'],
     mutationFn: async () => {
       if (!user) {
-        throw new Error('User not found')
+        throw new Error('User not found');
       }
 
       axios
         .get(MOCK_FILE_IDETIFIER)
         .then(async (response) => {
-          const data = response.data
+          const data = response.data;
 
-          console.log({ data })
           const jsonBlob = new Blob([JSON.stringify(data)], {
             type: 'application/json',
-          })
+          });
 
           // Create a File object from the Blob
           const mockFile = new File([jsonBlob], 'user.json', {
             type: 'application/json',
-          })
-          console.log({ mockFile })
+          });
+          console.log({ mockFile });
 
-          const extractedData = await extractChatData(mockFile)
-          await saveConversationsToFirestore(extractedData)
-          console.log('Conversations saved to Firestore')
-          await updateUserHasUploaded(user?.uid!)
-          setProgress(100)
+          const extractedData = await extractChatData(mockFile);
+          total = extractedData.length;
+          await saveConversationsToFirestore(extractedData);
+          console.log('Conversations saved to Firestore');
+          await updateUserHasUploaded(user?.uid!);
+          setProgress(100);
         })
         .catch((error) => {
-          console.error('Error fetching the JSON file:', error)
-        })
+          console.error('Error fetching the JSON file:', error);
+        });
     },
     onError: (err: any) => {
-      console.error({ err })
-      toast.error((err as Error).message ?? 'Something went wrong')
+      console.error({ err });
+      toast.error((err as Error).message ?? 'Something went wrong');
     },
     onSuccess: () => {
-      toast.success('Dummy data uploaded successfully')
-      getUserQuery.refetch()
+      toast.success('Dummy data uploaded successfully');
+      getUserQuery.refetch();
     },
-  })
+  });
 
   // Define the maximum number of documents per batch
-  const BATCH_SIZE = 10
+  const BATCH_SIZE = 10;
   async function saveConversationsToFirestore(
     conversations: Conversation[],
   ): Promise<void> {
-    let batch = writeBatch(db)
-    let batchCounter = 0
-    let totalBatches = 0
-    const docPath = `conversations/${user?.uid}/userConversations`
+    let batch = writeBatch(db);
+    let batchCounter = 0;
+    let totalBatches = 0;
+    const docPath = `conversations/${user?.uid}/userConversations`;
 
     for (const conversation of conversations) {
       // calc
@@ -177,87 +177,87 @@ export default function Dashboard() {
       // calculate total progress based on total and total batches
       const pro = Math.round(
         ((totalBatches * BATCH_SIZE + batchCounter) / total) * 100,
-      )
-      console.log({ pro, totalBatches, total })
+      );
+      console.log({ pro, totalBatches, total });
 
-      setProgress(pro)
-      const conversationRef = doc(db, docPath, conversation.conversation_id)
+      setProgress(pro);
+      const conversationRef = doc(db, docPath, conversation.conversation_id);
 
       const tagRes = await tagData([
         JSON.stringify({
           title: conversation.title,
           conversation_id: conversation.conversation_id,
         }),
-      ])
+      ]);
 
       const labelConversation = {
         ...conversation,
         label: tagRes.classifications.at(0)?.prediction,
-      }
-      batch.set(conversationRef, labelConversation)
-      batchCounter++
-      console.log('Batch counter:', batchCounter)
+      };
+      batch.set(conversationRef, labelConversation);
+      batchCounter++;
+      console.log('Batch counter:', batchCounter);
 
       // If the batch size limit is reached, commit the batch and start a new one
       if (batchCounter === BATCH_SIZE) {
-        console.log('Committing batch...')
-        await batch.commit()
-        totalBatches++
+        console.log('Committing batch...');
+        await batch.commit();
+        totalBatches++;
         console.log(
           `Batch ${totalBatches} committed with ${batchCounter} conversations.`,
-        )
-        batch = writeBatch(db) // Start a new batch
-        batchCounter = 0
+        );
+        batch = writeBatch(db); // Start a new batch
+        batchCounter = 0;
       }
     }
 
     // Commit any remaining conversations that didn't fill up a full batch
     if (batchCounter > 0) {
-      await batch.commit()
-      totalBatches++
+      await batch.commit();
+      totalBatches++;
       console.log(
         `Final batch ${totalBatches} committed with ${batchCounter} conversations.`,
-      )
+      );
     }
     console.log(
       `Finished saving ${conversations.length} conversations in ${totalBatches} batches.`,
-    )
+    );
   }
 
   const uploadFileMutation = useMutation({
     mutationKey: ['uploadFile'],
     mutationFn: async (file: File) => {
-      const storageRef = ref(storage, `chats/${file.name}_${user?.uid}`)
+      const storageRef = ref(storage, `chats/${file.name}_${user?.uid}`);
       try {
-        const snapshot = await uploadBytes(storageRef, file)
-        const downloadURL = await getDownloadURL(snapshot.ref)
-        console.log('Uploaded file and got download URL:', downloadURL)
-        await updateDb(downloadURL)
-        return downloadURL
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        console.log('Uploaded file and got download URL:', downloadURL);
+        await updateDb(downloadURL);
+        return downloadURL;
       } catch (error: any) {
-        console.error('Error uploading file:', error)
-        toast.error(error?.message ?? 'Something went wrong')
+        console.error('Error uploading file:', error);
+        toast.error(error?.message ?? 'Something went wrong');
       }
     },
     onError: (err: any) => {
-      console.error({ err })
-      toast.error((err as Error).message ?? 'Something went wrong')
+      console.error({ err });
+      toast.error((err as Error).message ?? 'Something went wrong');
     },
     onSuccess: (data: any) => {
-      toast.success('File uploaded successfully')
+      toast.success('File uploaded successfully');
     },
-  })
+  });
 
   if (loading || getUserQuery.isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen w-full">
         <Loader2 className="animate-spin" />{' '}
       </div>
-    )
+    );
   }
 
   if (!user || error) {
-    router.push('/login')
+    router.push('/login');
   }
 
   return (
@@ -293,8 +293,8 @@ export default function Dashboard() {
                 isPending={processFileMutation.isPending}
                 isDisabled={processFileMutation.isPending}
                 onClick={() => {
-                  setProgress(0)
-                  processFileMutation.mutate()
+                  setProgress(0);
+                  processFileMutation.mutate();
                 }}
               >
                 Process File
@@ -312,9 +312,9 @@ export default function Dashboard() {
                 className="my-2"
                 isPending={startWithDummyData.isPending}
                 onClick={() => {
-                  setProgress(0)
+                  setProgress(0);
 
-                  startWithDummyData.mutate()
+                  startWithDummyData.mutate();
                 }}
                 isDisabled={startWithDummyData.isPending}
               >
@@ -323,14 +323,14 @@ export default function Dashboard() {
               <Button
                 onClick={() => {
                   if (!user) {
-                    toast.error('Please login to upload a file')
-                    return
+                    toast.error('Please login to upload a file');
+                    return;
                   }
                   if (!file) {
-                    toast.error('Please select a file to upload')
-                    return
+                    toast.error('Please select a file to upload');
+                    return;
                   }
-                  uploadFileMutation.mutate(file)
+                  uploadFileMutation.mutate(file);
                 }}
                 className="w-full"
                 type="button"
@@ -356,11 +356,11 @@ export default function Dashboard() {
         )}
       </main>
     </div>
-  )
+  );
 }
 
 interface ConversationsPageProps {
-  conversations: Conversation[]
+  conversations: Conversation[];
 }
 const ConversationsPage: React.FC<ConversationsPageProps> = ({
   conversations,
@@ -369,19 +369,19 @@ const ConversationsPage: React.FC<ConversationsPageProps> = ({
   const groupedConversations: Record<string, Conversation[]> =
     conversations.reduce(
       (acc, conversation) => {
-        const { label } = conversation
+        const { label } = conversation;
         // @ts-ignore
         if (!acc[label]) {
           // @ts-ignore
 
-          acc[label] = []
+          acc[label] = [];
         }
         // @ts-ignore
-        acc[label].push(conversation)
-        return acc
+        acc[label].push(conversation);
+        return acc;
       },
       {} as Record<string, Conversation[]>,
-    )
+    );
 
   return (
     <Accordion type="single" collapsible className="w-full space-y-2 ">
@@ -406,5 +406,5 @@ const ConversationsPage: React.FC<ConversationsPageProps> = ({
         </AccordionItem>
       ))}
     </Accordion>
-  )
-}
+  );
+};

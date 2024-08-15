@@ -1,33 +1,33 @@
-'use client'
-import Image from 'next/image'
-import Link from 'next/link'
+'use client';
+import Image from 'next/image';
+import Link from 'next/link';
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { use, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
-import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
-import { useMutation } from '@tanstack/react-query'
-import { SignupData } from '@/types/auth'
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { use, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { SignupData } from '@/types/auth';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const user = auth.currentUser
-  const router = useRouter()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const user = auth.currentUser;
+  const router = useRouter();
   useEffect(() => {
-    console.log({ user })
+    console.log({ user });
 
     if (user) {
-      router.push('/dashboard')
+      router.push('/dashboard');
     }
-  }, [router, user])
+  }, [router, user]);
 
   const loginMutation = useMutation({
     mutationKey: ['signup'],
@@ -36,18 +36,18 @@ export default function LoginPage() {
         auth,
         data.email,
         data.password,
-      )
-      const userCreds = response.user
+      );
+      const userCreds = response.user;
       if (userCreds) {
-        localStorage.setItem('userId', JSON.stringify(userCreds.uid))
-        return { userCreds }
+        localStorage.setItem('userId', JSON.stringify(userCreds.uid));
+        return { userCreds };
       }
     },
     onError: (err) => {
-      console.error({ err })
-      toast.error((err as Error).message ?? 'Something went wrong')
+      console.error({ err });
+      toast.error((err as Error).message ?? 'Something went wrong');
     },
-  })
+  });
 
   return (
     <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
@@ -86,10 +86,10 @@ export default function LoginPage() {
               className="w-full"
               onClick={() => {
                 if (!email || !password) {
-                  toast.error('Please fill all fields')
-                  return
+                  toast.error('Please fill all fields');
+                  return;
                 }
-                loginMutation.mutate({ email, password })
+                loginMutation.mutate({ email, password });
               }}
               isPending={loginMutation.isPending}
               isDisabled={loginMutation.isPending}
@@ -115,5 +115,5 @@ export default function LoginPage() {
         />
       </div>
     </div>
-  )
+  );
 }
