@@ -48,6 +48,9 @@ export default function Singup() {
       console.error({ err });
       toast.error((err as Error).message ?? 'Something went wrong');
     },
+    onSuccess: () => {
+      router.push('/dashboard');
+    },
   });
 
   if (loading) {

@@ -47,6 +47,9 @@ export default function LoginPage() {
       console.error({ err });
       toast.error((err as Error).message ?? 'Something went wrong');
     },
+    onSuccess: () => {
+      router.push('/dashboard');
+    },
   });
 
   return (
