@@ -7,8 +7,10 @@ import { auth } from '@/lib/firebase';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function Navbar() {
+  const router = useRouter();
   const logoutMut = useMutation({
     mutationKey: ['logout'],
     mutationFn: async () => {
@@ -17,6 +19,9 @@ export function Navbar() {
     onError: (err) => {
       console.error({ err });
       toast.error((err as Error).message ?? 'Something went wrong');
+    },
+    onSuccess: () => {
+      router.push('/');
     },
   });
   const [user, loading, error] = useAuthState(auth);
