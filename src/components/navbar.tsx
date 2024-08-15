@@ -6,6 +6,7 @@ import { Button } from './ui/button'
 import { auth } from '@/lib/firebase'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 export function Navbar() {
   const logoutMut = useMutation({
@@ -21,7 +22,7 @@ export function Navbar() {
   const [user, loading, error] = useAuthState(auth)
   return (
     <nav className=" fixed top-0 left-0 right-0 z-50 backdrop-blur-sm shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 md:px-16 lg:px-32 w-full">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -36,36 +37,32 @@ export function Navbar() {
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
                 <a
-                  href="#"
+                  href="/dashboard"
                   className="text-sm font-medium text-gray-900 hover:text-gray-700"
                 >
                   Dashboard
-                </a>
-                <a
-                  href="#"
-                  className="text-sm font-medium text-gray-900 hover:text-gray-700"
-                >
-                  Team
-                </a>
-                <a
-                  href="#"
-                  className="text-sm font-medium text-gray-900 hover:text-gray-700"
-                >
-                  Projects
                 </a>
               </div>
             </div>
           </div>
           <div>
-            <Button
-              isPending={loading || logoutMut.isPending}
-              isDisabled={loading || logoutMut.isPending}
-              onClick={() => {
-                logoutMut.mutate()
-              }}
-            >
-              Logout
-            </Button>
+            {user?.uid ? (
+              <Button
+                isPending={loading || logoutMut.isPending}
+                isDisabled={loading || logoutMut.isPending}
+                onClick={() => {
+                  logoutMut.mutate()
+                }}
+              >
+                Logout
+              </Button>
+            ) : (
+              <Button>
+                <Link href="/login" className="w-full h-full">
+                  Login
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>

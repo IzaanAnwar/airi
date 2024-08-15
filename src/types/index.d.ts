@@ -1,6 +1,6 @@
 export interface Message {
   id: string
-  author_role: string
+  author_role: string | 'user'
   content: string
   timestamp: number
   parent_id?: string
@@ -9,6 +9,7 @@ export interface Message {
 
 export interface Conversation {
   title: string
+  label?: string
   create_time: number
   update_time: number
   conversation_id: string

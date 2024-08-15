@@ -1,9 +1,8 @@
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore'
 import { db } from './firebase'
-// import { openai } from './openai'
-import axios from 'axios'
 
 import { CohereClient } from 'cohere-ai'
+import { Conversation } from '@/types'
 
 const cohere = new CohereClient({
   token: process.env.NEXT_PUBLIC_COHERCE_API_KEY,
@@ -48,7 +47,7 @@ export const getSummary = async ({
   }
 }
 
-export async function getTitleAndConversationId(userId: string) {
+export async function getUsersCoversations(userId: string) {
   const conversationsRef = collection(
     db,
     `conversations/${userId}/userConversations`,
@@ -57,13 +56,26 @@ export async function getTitleAndConversationId(userId: string) {
 
   const conversations = snapshot.docs.map((doc) => {
     const data = doc.data()
-    return JSON.stringify({
-      title: data.title,
-      conversation_id: data.conversation_id,
-    })
+    return data as Conversation
   })
 
   return conversations
+}
+
+export async function getConversationById(
+  conversationId: string,
+  userId: string,
+) {
+  const conversationsRef = doc(
+    db,
+    `conversations/${userId}/userConversations`,
+    conversationId,
+  )
+  const snapshot = await getDoc(conversationsRef)
+
+  const conversation = snapshot.data()
+
+  return conversation as Conversation | undefined
 }
 
 export async function tagData(data: string[]) {

@@ -30,7 +30,14 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { Conversation, IUser, Message } from '@/types'
 import { extractChatData } from '@/lib/utils'
 import { Progress } from '@/components/ui/progress'
-import { getSummary, getTitleAndConversationId, tagData } from '@/lib/queries'
+import { getSummary, getUsersCoversations, tagData } from '@/lib/queries'
+import CoversationCard from '@/components/coversation-card'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 
 const MOCK_FILE_IDETIFIER = 'conversations.json_wO11ZJVshPbdCGobWqRhvBWiq5W2'
 export default function Dashboard() {
@@ -87,6 +94,17 @@ export default function Dashboard() {
     },
     onSuccess: (data: any) => {
       toast.success('File uploaded successfully')
+    },
+  })
+
+  const getConversationsQuery = useQuery({
+    queryKey: ['getConversations', user?.uid],
+    queryFn: async () => {
+      if (!user) {
+        throw new Error('User not found')
+      }
+      const conversations = await getUsersCoversations(user.uid)
+      return conversations
     },
   })
 
@@ -213,7 +231,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background py-20">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background py-20 px-2 md:px-16 lg:px-32">
       {getUserQuery.data?.has_uploaded === false && (
         <Card className="w-full max-w-md p-6 space-y-4">
           <CardHeader>
@@ -290,81 +308,61 @@ export default function Dashboard() {
           </CardFooter>
         </Card>
       )}
-      <main className="flex flex-1 flex-col gap-8 p-4 sm:p-8 md:p-10">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <Link href="#" className="group" prefetch={false}>
-            <Card className="h-full w-full overflow-hidden transition-all hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <CardHeader className="bg-muted/50 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold">
-                    Team Meeting
-                  </CardTitle>
-                  <div className="text-sm text-muted-foreground">2:39pm</div>
-                </div>
-              </CardHeader>
-              <CardContent className="px-6 py-4">
-                <p>
-                  Discussing our quarterly goals and planning for the next few
-                  months.
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="#" className="group" prefetch={false}>
-            <Card className="h-full w-full overflow-hidden transition-all hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <CardHeader className="bg-muted/50 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold">
-                    Design Review
-                  </CardTitle>
-                  <div className="text-sm text-muted-foreground">3:15pm</div>
-                </div>
-              </CardHeader>
-              <CardContent className="px-6 py-4">
-                <p>
-                  Reviewing the new website design and getting feedback from the
-                  team.
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="#" className="group" prefetch={false}>
-            <Card className="h-full w-full overflow-hidden transition-all hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <CardHeader className="bg-muted/50 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold">
-                    Sales Update
-                  </CardTitle>
-                  <div className="text-sm text-muted-foreground">4:30pm</div>
-                </div>
-              </CardHeader>
-              <CardContent className="px-6 py-4">
-                <p>
-                  Discussing our latest sales numbers and strategies for the
-                  upcoming quarter.
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="#" className="group" prefetch={false}>
-            <Card className="h-full w-full overflow-hidden transition-all hover:scale-[1.02] hover:shadow-lg focus:scale-[1.02] focus:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <CardHeader className="bg-muted/50 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold">
-                    Product Roadmap
-                  </CardTitle>
-                  <div className="text-sm text-muted-foreground">5:00pm</div>
-                </div>
-              </CardHeader>
-              <CardContent className="px-6 py-4">
-                <p>
-                  Discussing our product roadmap and upcoming feature releases.
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
+      <main className="flex flex-1 flex-col gap-8  w-full ">
+        {getConversationsQuery.data && (
+          <ConversationsPage conversations={getConversationsQuery.data} />
+        )}
       </main>
     </div>
+  )
+}
+
+interface ConversationsPageProps {
+  conversations: Conversation[]
+}
+const ConversationsPage: React.FC<ConversationsPageProps> = ({
+  conversations,
+}) => {
+  // Group conversations by labels
+  const groupedConversations: Record<string, Conversation[]> =
+    conversations.reduce(
+      (acc, conversation) => {
+        const { label } = conversation
+        // @ts-ignore
+        if (!acc[label]) {
+          // @ts-ignore
+
+          acc[label] = []
+        }
+        // @ts-ignore
+        acc[label].push(conversation)
+        return acc
+      },
+      {} as Record<string, Conversation[]>,
+    )
+
+  return (
+    <Accordion type="single" collapsible className="w-full space-y-2 ">
+      {Object.keys(groupedConversations).map((label) => (
+        <AccordionItem key={label} value={label} className="border-none">
+          <AccordionTrigger className="text-lg font-bold hover:no-underline hover:bg-primary/5 rounded-xl px-4 ">
+            {label}
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="grid gap-6 py-4">
+              {groupedConversations[label].map((conversation) => (
+                <CoversationCard
+                  key={conversation.conversation_id}
+                  title={conversation.title}
+                  id={conversation.conversation_id}
+                  label={conversation.label}
+                  updatedAt={conversation.update_time}
+                />
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
   )
 }
