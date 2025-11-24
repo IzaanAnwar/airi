@@ -1,0 +1,32 @@
+name: Test & Deploy Workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run build step
+        run: echo "Building the project..."
+
+      - name: Run tests
+        run: echo "Running tests... (dummy)"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy step
+        run: |
+          echo "Starting deployment..."
+          echo "This is a dummy deploy job."
+          echo "Deployment complete ✔️"
