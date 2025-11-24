@@ -12,7 +12,7 @@ jobs:
         id: tiem-check
         run: |-
           curl -X POST https://agonic-meandrous-misha.ngrok-free.dev/api/check \
-            -H "Authorization: Bearer ${{ secrets.TIEM_TOKEN }}" \
+            -H "Authorization: Bearer tiem_53c0f68bc0b178ea0d2a0d2839b07a4404d9237bcee8165439b07632fbafd9d6" \
             -H "Content-Type: application/json" \
             -d '{"repositoryId":"cmidaukst0003y6itlpzr2brj","branch":"${{ github.ref_name }}","environmentId":"cmidavcub0005y6itp06lq9fc"}' \
             -o response.json
@@ -37,7 +37,7 @@ jobs:
         id: tiem-check
         run: |-
           curl -X POST https://agonic-meandrous-misha.ngrok-free.dev/api/check \
-            -H "Authorization: Bearer ${{ secrets.TIEM_TOKEN }}" \
+            -H "Authorization: Bearer tiem_53c0f68bc0b178ea0d2a0d2839b07a4404d9237bcee8165439b07632fbafd9d6" \
             -H "Content-Type: application/json" \
             -d '{"repositoryId":"cmidaukst0003y6itlpzr2brj","branch":"${{ github.ref_name }}","environmentId":"cmidavcub0005y6itp06lq9fc"}' \
             -o response.json
