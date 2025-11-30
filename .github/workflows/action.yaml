@@ -14,7 +14,7 @@ jobs:
           LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
         run: |-
           curl -X POST https://limvio.vercel.app/api/check \
-            -H "Authorization: Bearer $LIMVIO_TOKEN" \
+            -H "Authorization: Bearer limvio_382b91abb5a3f894e434b3a020b43bc6069f6d5f5570a3bdabb57de13e3c4f70" \
             -H "Content-Type: application/json" \
             -d "{"repositoryId":"cmilrws28000y04l5a9r6u5u7","branch":"${{ github.ref_name }}","environmentId":"cmilrxu9u000z04l577q7mmb0"}" \
             -o response.json
