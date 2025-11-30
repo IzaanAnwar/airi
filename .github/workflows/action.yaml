@@ -8,6 +8,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Check Deployment Window
+        id: limvio-check
+        env:
+          LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
+        run: |-
+          curl -X POST https://limvio.vercel.app/api/check \
+            -H "Authorization: Bearer $LIMVIO_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{"repositoryId":"cmilrws28000y04l5a9r6u5u7","branch":"${{ github.ref_name }}","environmentId":"cmilrxu9u000z04l577q7mmb0"}" \
+            -o response.json
+
+          allowed=$(jq -r '.allowed' response.json)
+          if [ "$allowed" != "true" ]; then
+            reason=$(jq -r '.reason' response.json)
+            echo "::error::Deployment blocked: $reason"
+            exit 1
+          fi
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Run build step
@@ -18,6 +35,23 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Check Deployment Window
+        id: limvio-check
+        env:
+          LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
+        run: |-
+          curl -X POST https://limvio.vercel.app/api/check \
+            -H "Authorization: Bearer $LIMVIO_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{"repositoryId":"cmilrws28000y04l5a9r6u5u7","branch":"${{ github.ref_name }}","environmentId":"cmilrxu9u000z04l577q7mmb0"}" \
+            -o response.json
+
+          allowed=$(jq -r '.allowed' response.json)
+          if [ "$allowed" != "true" ]; then
+            reason=$(jq -r '.reason' response.json)
+            echo "::error::Deployment blocked: $reason"
+            exit 1
+          fi
       - name: Deploy step
         run: |
           echo "Starting deployment..."
