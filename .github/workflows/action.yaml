@@ -18,6 +18,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Wait for 20 seconds
+        run: |
+          echo "Waiting for 20 seconds before deployment..."
+          sleep 20
+          echo "Wait complete!"
       - name: Deploy step
         run: |
           echo "Starting deployment..."
