@@ -6,6 +6,8 @@ name: Test & Deploy Workflow
   pull_request:
     types:
       - opened
+      - synchronize
+      - reopened
   workflow_dispatch: null
 jobs:
   build:
