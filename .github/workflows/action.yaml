@@ -3,6 +3,9 @@ name: Test & Deploy Workflow
   push:
     branches:
       - main
+  pull_request:
+    types:
+      - opened
   workflow_dispatch: null
 jobs:
   build:
