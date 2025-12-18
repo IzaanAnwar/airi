@@ -13,6 +13,32 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Check Deployment Window
+        id: limvio-check
+        env:
+          LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
+        run: |-
+
+
+          branch=${{ github.base_ref || github.ref_name }}
+          pattern='IzaanAnwar-patch-1'
+          if [[ "$branch" != $pattern ]]; then
+            echo "Limvio: skipping deployment check (branch '$branch' does not match policy pattern '$pattern')"
+            exit 0
+          fi
+
+          curl -X POST https://www.limvio.com/api/check \
+            -H "Authorization: Bearer $LIMVIO_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"repositoryId":"cmjb291q8000004jsscqiryhd","branch":"${{ github.base_ref || github.ref_name }}","environmentId":"cmjb2ct24000504icoz2gmrvc"}' \
+            -o response.json
+
+          allowed=$(jq -r '.allowed' response.json)
+          if [ "$allowed" != "true" ]; then
+            reason=$(jq -r '.reason' response.json)
+            echo "::error::Deployment blocked: $reason"
+            exit 1
+          fi
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Run build step
@@ -23,6 +49,32 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Check Deployment Window
+        id: limvio-check
+        env:
+          LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
+        run: |-
+
+
+          branch=${{ github.base_ref || github.ref_name }}
+          pattern='IzaanAnwar-patch-1'
+          if [[ "$branch" != $pattern ]]; then
+            echo "Limvio: skipping deployment check (branch '$branch' does not match policy pattern '$pattern')"
+            exit 0
+          fi
+
+          curl -X POST https://www.limvio.com/api/check \
+            -H "Authorization: Bearer $LIMVIO_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"repositoryId":"cmjb291q8000004jsscqiryhd","branch":"${{ github.base_ref || github.ref_name }}","environmentId":"cmjb2ct24000504icoz2gmrvc"}' \
+            -o response.json
+
+          allowed=$(jq -r '.allowed' response.json)
+          if [ "$allowed" != "true" ]; then
+            reason=$(jq -r '.reason' response.json)
+            echo "::error::Deployment blocked: $reason"
+            exit 1
+          fi
       - name: Wait for 20 seconds
         run: |
           echo "Waiting for 20 seconds before deployment..."
