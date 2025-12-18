@@ -16,7 +16,7 @@ jobs:
       - name: Check Deployment Window
         id: limvio-check
         env:
-          LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
+          LIMVIO_TOKEN: "limvio_084f5e4cdfe5e1bb86a1e8a3508023aa90ba1f1764c69a2bad56a3ee67262d94"
         run: |-
 
 
@@ -52,7 +52,7 @@ jobs:
       - name: Check Deployment Window
         id: limvio-check
         env:
-          LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
+          LIMVIO_TOKEN: "limvio_084f5e4cdfe5e1bb86a1e8a3508023aa90ba1f1764c69a2bad56a3ee67262d94"
         run: |-
 
 
@@ -76,9 +76,10 @@ jobs:
             exit 1
           fi
       - name: Wait for 20 seconds
+      - name: Wait for 120 seconds
         run: |
-          echo "Waiting for 20 seconds before deployment..."
-          sleep 20
+          echo "Waiting for 120 seconds before deployment..."
+          sleep 120
           echo "Wait complete!"
       - name: Deploy step
         run: |
