@@ -17,7 +17,7 @@ jobs:
         id: limvio-check
         if: ${{ github.event_name != 'pull_request' && github.event_name != 'pull_request_target' }}
         env:
-          LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
+          LIMVIO_TOKEN: "limvio_084f5e4cdfe5e1bb86a1e8a3508023aa90ba1f1764c69a2bad56a3ee67262d94"
           LIMVIO_BRANCH: ${{ github.base_ref || github.ref_name }}
           LIMVIO_BRANCH_PATTERN: IzaanAnwar-patch-1
         run: |-
@@ -64,7 +64,7 @@ jobs:
         id: limvio-check
         if: ${{ github.event_name != 'pull_request' && github.event_name != 'pull_request_target' }}
         env:
-          LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
+          LIMVIO_TOKEN: "limvio_084f5e4cdfe5e1bb86a1e8a3508023aa90ba1f1764c69a2bad56a3ee67262d94"
           LIMVIO_BRANCH: ${{ github.base_ref || github.ref_name }}
           LIMVIO_BRANCH_PATTERN: IzaanAnwar-patch-1
         run: |-
