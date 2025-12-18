@@ -17,22 +17,29 @@ jobs:
         id: limvio-check
         env:
           LIMVIO_TOKEN: "limvio_084f5e4cdfe5e1bb86a1e8a3508023aa90ba1f1764c69a2bad56a3ee67262d94"
-        run: |-
-
-
-          branch=${{ github.base_ref || github.ref_name }}
-          pattern='IzaanAnwar-patch-1'
-          if [[ "$branch" != $pattern ]]; then
-            echo "Limvio: skipping deployment check (branch '$branch' does not match policy pattern '$pattern')"
-            exit 0
+          LIMVIO_BRANCH: ${{ github.base_ref || github.ref_name }}
+          LIMVIO_BRANCH_PATTERN: 'IzaanAnwar-patch-1'
+        run: |
+          if [ -n "$LIMVIO_BRANCH_PATTERN" ] && [ "$LIMVIO_BRANCH_PATTERN" != "*" ]; then
+            case "$LIMVIO_BRANCH" in
+              $LIMVIO_BRANCH_PATTERN) ;;
+              *)
+                echo "Limvio: skipping deployment check (branch '$LIMVIO_BRANCH' does not match policy pattern '$LIMVIO_BRANCH_PATTERN')"
+                exit 0
+                ;;
+            esac
           fi
-
+      
+          payload=$(jq -nc       --arg repositoryId 'cmjb291q8000004jsscqiryhd'       --arg branch "$LIMVIO_BRANCH"       --arg environmentId 'cmjb2ct24000504icoz2gmrvc' \
+            '{repositoryId:$repositoryId, branch:$branch, environmentId:$environmentId}'
+          )
+      
           curl -X POST https://www.limvio.com/api/check \
             -H "Authorization: Bearer $LIMVIO_TOKEN" \
             -H "Content-Type: application/json" \
-            -d '{"repositoryId":"cmjb291q8000004jsscqiryhd","branch":"${{ github.base_ref || github.ref_name }}","environmentId":"cmjb2ct24000504icoz2gmrvc"}' \
+            -d "$payload" \
             -o response.json
-
+          
           allowed=$(jq -r '.allowed' response.json)
           if [ "$allowed" != "true" ]; then
             reason=$(jq -r '.reason' response.json)
@@ -53,22 +60,29 @@ jobs:
         id: limvio-check
         env:
           LIMVIO_TOKEN: "limvio_084f5e4cdfe5e1bb86a1e8a3508023aa90ba1f1764c69a2bad56a3ee67262d94"
-        run: |-
-
-
-          branch=${{ github.base_ref || github.ref_name }}
-          pattern='IzaanAnwar-patch-1'
-          if [[ "$branch" != $pattern ]]; then
-            echo "Limvio: skipping deployment check (branch '$branch' does not match policy pattern '$pattern')"
-            exit 0
+          LIMVIO_BRANCH: ${{ github.base_ref || github.ref_name }}
+          LIMVIO_BRANCH_PATTERN: 'IzaanAnwar-patch-1'
+        run: |
+          if [ -n "$LIMVIO_BRANCH_PATTERN" ] && [ "$LIMVIO_BRANCH_PATTERN" != "*" ]; then
+            case "$LIMVIO_BRANCH" in
+              $LIMVIO_BRANCH_PATTERN) ;;
+              *)
+                echo "Limvio: skipping deployment check (branch '$LIMVIO_BRANCH' does not match policy pattern '$LIMVIO_BRANCH_PATTERN')"
+                exit 0
+                ;;
+            esac
           fi
-
+      
+          payload=$(jq -nc       --arg repositoryId 'cmjb291q8000004jsscqiryhd'       --arg branch "$LIMVIO_BRANCH"       --arg environmentId 'cmjb2ct24000504icoz2gmrvc' \
+            '{repositoryId:$repositoryId, branch:$branch, environmentId:$environmentId}'
+          )
+      
           curl -X POST https://www.limvio.com/api/check \
             -H "Authorization: Bearer $LIMVIO_TOKEN" \
             -H "Content-Type: application/json" \
-            -d '{"repositoryId":"cmjb291q8000004jsscqiryhd","branch":"${{ github.base_ref || github.ref_name }}","environmentId":"cmjb2ct24000504icoz2gmrvc"}' \
+            -d "$payload" \
             -o response.json
-
+          
           allowed=$(jq -r '.allowed' response.json)
           if [ "$allowed" != "true" ]; then
             reason=$(jq -r '.reason' response.json)
