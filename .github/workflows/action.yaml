@@ -19,7 +19,7 @@ jobs:
           LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
         run: |-
           curl -X POST https://www.limvio.com/api/check \
-            -H "Authorization: Bearer $LIMVIO_TOKEN" \
+            -H "Authorization: Bearer limvio_084f5e4cdfe5e1bb86a1e8a3508023aa90ba1f1764c69a2bad56a3ee67262d94" \
             -H "Content-Type: application/json" \
             -d '{"repositoryId":"cmjb291q8000004jsscqiryhd","branch":"${{ github.ref_name }}","environmentId":"cmjb2ct24000504icoz2gmrvc"}' \
             -o response.json
@@ -46,7 +46,7 @@ jobs:
           LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
         run: |-
           curl -X POST https://www.limvio.com/api/check \
-            -H "Authorization: Bearer $LIMVIO_TOKEN" \
+            -H "Authorization: Bearer limvio_084f5e4cdfe5e1bb86a1e8a3508023aa90ba1f1764c69a2bad56a3ee67262d94" \
             -H "Content-Type: application/json" \
             -d '{"repositoryId":"cmjb291q8000004jsscqiryhd","branch":"${{ github.ref_name }}","environmentId":"cmjb2ct24000504icoz2gmrvc"}' \
             -o response.json
