@@ -89,7 +89,6 @@ jobs:
             echo "::error::Deployment blocked: $reason"
             exit 1
           fi
-      - name: Wait for 20 seconds
       - name: Wait for 120 seconds
         run: |
           echo "Waiting for 120 seconds before deployment..."
