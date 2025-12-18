@@ -13,6 +13,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Check Deployment Window
+        id: limvio-check
+        env:
+          LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
+        run: |-
+          curl -X POST https://www.limvio.com/api/check \
+            -H "Authorization: Bearer limvio_084f5e4cdfe5e1bb86a1e8a3508023aa90ba1f1764c69a2bad56a3ee67262d94" \
+            -H "Content-Type: application/json" \
+            -d '{"repositoryId":"cmjb291q8000004jsscqiryhd","branch":"${{ github.ref_name }}","environmentId":"cmjb2ct24000504icoz2gmrvc"}' \
+            -o response.json
+
+          allowed=$(jq -r '.allowed' response.json)
+          if [ "$allowed" != "true" ]; then
+            reason=$(jq -r '.reason' response.json)
+            echo "::error::Deployment blocked: $reason"
+            exit 1
+          fi
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Run build step
@@ -23,6 +40,23 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Check Deployment Window
+        id: limvio-check
+        env:
+          LIMVIO_TOKEN: ${{ secrets.LIMVIO_TOKEN }}
+        run: |-
+          curl -X POST https://www.limvio.com/api/check \
+            -H "Authorization: Bearer limvio_084f5e4cdfe5e1bb86a1e8a3508023aa90ba1f1764c69a2bad56a3ee67262d94" \
+            -H "Content-Type: application/json" \
+            -d '{"repositoryId":"cmjb291q8000004jsscqiryhd","branch":"${{ github.ref_name }}","environmentId":"cmjb2ct24000504icoz2gmrvc"}' \
+            -o response.json
+
+          allowed=$(jq -r '.allowed' response.json)
+          if [ "$allowed" != "true" ]; then
+            reason=$(jq -r '.reason' response.json)
+            echo "::error::Deployment blocked: $reason"
+            exit 1
+          fi
       - name: Wait for 20 seconds
         run: |
           echo "Waiting for 20 seconds before deployment..."
